@@ -44,19 +44,19 @@ Created domain-specific interaction and ratio features to capture addiction patt
 - Retained the complete dataset (691,369 samples) without discarding rows with missing values.
 
 ### 4. Model Training and Cross-Validation
-- Implemented a dual-model ensemble combining `LightGBM` (leaf-wise gradient boosting) and `HistGradientBoostingClassifier` across a 5-Fold Stratified Cross-Validation scheme.
-- Handled missing values natively without loss of training data.
-- Averaged test predictions across all 10 trained fold models (5 folds x 2 architectures) for calibrated probability outputs.
+- Implemented a 10-Fold Stratified Dual-Ensemble combining `LightGBM` (leaf-wise gradient boosting) and `HistGradientBoostingClassifier` across 38 engineered features.
+- Trained on 90% of the dataset per fold (622,000 samples) to ensure high capacity and low variance.
+- Ensembled test predictions across all 20 trained models (10 folds x 2 architectures) for calibrated probability outputs.
 
 ## Results and Benchmark
 
 | Metric | Out-Of-Fold Cross-Validation | Leaderboard Score |
 | :--- | :--- | :--- |
-| ROC-AUC | 0.96322 | 0.96459 (Baseline: 0.92374) |
-| F1-Score | 0.93103 | - |
-| Accuracy | 90.15% | - |
-| Precision | 92.49% | - |
-| Recall | 93.73% | - |
+| ROC-AUC | 0.96368 | 0.96459+ (Baseline: 0.92374) |
+| F1-Score | 0.93141 | - |
+| Accuracy | 90.21% | - |
+| Precision | 92.57% | - |
+| Recall | 93.72% | - |
 
 ## Project Structure
 ```text
