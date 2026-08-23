@@ -44,19 +44,19 @@ Created domain-specific interaction and ratio features to capture addiction patt
 - Retained the complete dataset (691,369 samples) without discarding rows with missing values.
 
 ### 4. Model Training and Cross-Validation
-- Used `HistGradientBoostingClassifier`, which natively handles missing values and scales efficiently on large tabular datasets.
-- Implemented a 5-Fold Stratified Cross-Validation scheme to ensure robust evaluation and reduce prediction variance.
-- Ensembled test predictions across all 5 trained fold models.
+- Implemented a dual-model ensemble combining `LightGBM` (leaf-wise gradient boosting) and `HistGradientBoostingClassifier` across a 5-Fold Stratified Cross-Validation scheme.
+- Handled missing values natively without loss of training data.
+- Averaged test predictions across all 10 trained fold models (5 folds x 2 architectures) for calibrated probability outputs.
 
 ## Results and Benchmark
 
 | Metric | Out-Of-Fold Cross-Validation | Leaderboard Score |
 | :--- | :--- | :--- |
-| ROC-AUC | 0.96248 | 0.96393 |
-| F1-Score | 0.93018 | - |
-| Accuracy | 90.03% | - |
-| Precision | 92.42% | - |
-| Recall | 93.62% | - |
+| ROC-AUC | 0.96322 | 0.96393 (Baseline: 0.92374) |
+| F1-Score | 0.93103 | - |
+| Accuracy | 90.15% | - |
+| Precision | 92.49% | - |
+| Recall | 93.73% | - |
 
 ## Project Structure
 ```text
