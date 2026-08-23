@@ -52,7 +52,7 @@ Created domain-specific interaction and ratio features to capture addiction patt
 
 | Metric | Out-Of-Fold Cross-Validation | Leaderboard Score |
 | :--- | :--- | :--- |
-| ROC-AUC | 0.96368 | 0.96459+ (Baseline: 0.92374) |
+| ROC-AUC | 0.96368 | 0.96494 (Baseline: 0.92374) |
 | F1-Score | 0.93141 | - |
 | Accuracy | 90.21% | - |
 | Precision | 92.57% | - |
