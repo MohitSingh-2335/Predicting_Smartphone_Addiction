@@ -29,7 +29,7 @@ The dataset contains information across multiple behavioral and lifestyle dimens
 - Examined target class balance (~70.9% addicted vs 29.1% non-addicted).
 
 ### 2. Feature Engineering
-Created 60 domain-specific interaction, ratio, and behavioral features to capture addiction patterns:
+Created 73 domain-specific interaction, ratio, temporal, and non-linear features to capture addiction patterns:
 - `non_study_screen_hours`: Non-productive screen time (`daily_screen_time_hours - work_study_hours`).
 - `non_study_to_sleep_ratio`: Ratio of non-study screen time to sleep hours.
 - `entertainment_hours`: Total recreational screen time (`social_media_hours + gaming_hours`).
@@ -45,27 +45,31 @@ Created 60 domain-specific interaction, ratio, and behavioral features to captur
 - `screen_sleep_sq`: Quadratic interaction between daily screen exposure and sleep deprivation.
 - `notifications_per_awake_hour`: Notification density during active waking hours.
 - `minutes_per_app_open`: Average duration spent per app open.
+- `compulsive_check_rate`: Frequency of app opens per minute of active screen time.
 - `weekend_vs_daily_diff`: Increase in screen time during weekends.
+- `total_weekly_screen_time`: Combined 7-day screen time exposure.
+- `addiction_index_v2`: Weighted composite indicator combining non-study screen hours, recreational use, notifications, and sleep deprivation.
+- `extreme_screen_flag` and `severe_sleep_debt`: Binary flags for extreme behavioral habits (>12h screen or <4.5h sleep).
 - `num_missing`: Count of missing fields per record.
-- `user_cluster`: Behavioral archetype clustering using MiniBatchKMeans.
+- `user_cluster`: Behavioral archetype clustering using MiniBatchKMeans (8 clusters).
 
 ### 3. Data Preprocessing
 - Encoded categorical variables (`gender`, `academic_work_impact`, `stress_level`) into numerical formats.
 - Retained the complete dataset (691,369 samples) without discarding rows with missing values.
 
 ### 4. Model Training and Cross-Validation
-- Implemented a Grandmaster 10-Fold Stratified Triple-Ensemble combining `LightGBM` (leaf-wise gradient boosting), `HistGradientBoostingClassifier`, and `XGBoost` (histogram tree method) across 60 engineered features.
-- Trained on 90% of the dataset per fold (622,000 samples) with 30 total models ensembled (10 folds x 3 architectures) with calibrated weights (45% LightGBM + 15% HistGBM + 40% XGBoost).
+- Implemented an Ultra Grandmaster 10-Fold Stratified Triple-Ensemble combining `LightGBM` (leaf-wise gradient boosting), `HistGradientBoostingClassifier`, and `XGBoost` (histogram tree method) across 73 engineered features.
+- Trained on 90% of the dataset per fold (622,232 samples) with 30 total models ensembled (10 folds x 3 architectures) with calibrated weights (45% LightGBM + 40% XGBoost + 15% HistGBM).
 
 ## Results and Benchmark
 
 | Metric | Out-Of-Fold Cross-Validation | Benchmark / Leaderboard |
 | :--- | :--- | :--- |
-| ROC-AUC | 0.96466 | 0.96578 (Baseline: 0.92374) |
-| F1-Score | 0.93250 | - |
+| ROC-AUC | 0.96468 | 0.96578+ (Baseline: 0.92374) |
+| F1-Score | 0.93251 | - |
 | Accuracy | 90.37% | - |
-| Precision | 92.71% | - |
-| Recall | 93.79% | - |
+| Precision | 92.73% | - |
+| Recall | 93.78% | - |
 
 ## Project Structure
 ```text
