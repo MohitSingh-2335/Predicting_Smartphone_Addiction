@@ -29,7 +29,7 @@ The dataset contains information across multiple behavioral and lifestyle dimens
 - Examined target class balance (~70.9% addicted vs 29.1% non-addicted).
 
 ### 2. Feature Engineering
-Created 73 domain-specific interaction, ratio, temporal, and non-linear features to capture addiction patterns:
+Created 75 domain-specific interaction, ratio, temporal, non-linear, and clustered features to capture addiction patterns:
 - `non_study_screen_hours`: Non-productive screen time (`daily_screen_time_hours - work_study_hours`).
 - `non_study_to_sleep_ratio`: Ratio of non-study screen time to sleep hours.
 - `entertainment_hours`: Total recreational screen time (`social_media_hours + gaming_hours`).
@@ -58,18 +58,18 @@ Created 73 domain-specific interaction, ratio, temporal, and non-linear features
 - Retained the complete dataset (691,369 samples) without discarding rows with missing values.
 
 ### 4. Model Training and Cross-Validation
-- Implemented an Ultra Grandmaster 10-Fold Stratified Triple-Ensemble combining `LightGBM` (leaf-wise gradient boosting), `HistGradientBoostingClassifier`, and `XGBoost` (histogram tree method) across 73 engineered features.
-- Trained on 90% of the dataset per fold (622,232 samples) with 30 total models ensembled (10 folds x 3 architectures) with calibrated weights (45% LightGBM + 40% XGBoost + 15% HistGBM).
+- Implemented a Dual-Seed Bagged 10-Fold Stratified Grandmaster Ensemble combining `LightGBM` (leaf-wise gradient boosting), `HistGradientBoostingClassifier`, and `XGBoost` (histogram tree method) across 75 engineered features.
+- Multi-seed bagging (Seed 42 and Seed 2026) across 10 folds produces 60 total models (20x LightGBM + 20x XGBoost + 20x HistGBM) ensembled with calibrated weights (45% LightGBM + 40% XGBoost + 15% HistGBM).
 
 ## Results and Benchmark
 
 | Metric | Out-Of-Fold Cross-Validation | Benchmark / Leaderboard |
 | :--- | :--- | :--- |
-| ROC-AUC | 0.96468 | 0.96584 (Baseline: 0.92374) |
-| F1-Score | 0.93251 | - |
+| ROC-AUC | 0.96466 | 0.96584+ (Baseline: 0.92374) |
+| F1-Score | 0.93255 | - |
 | Accuracy | 90.37% | - |
 | Precision | 92.73% | - |
-| Recall | 93.78% | - |
+| Recall | 93.79% | - |
 
 ## Project Structure
 ```text
