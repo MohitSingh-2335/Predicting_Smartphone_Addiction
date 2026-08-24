@@ -65,7 +65,7 @@ Created 73 domain-specific interaction, ratio, temporal, and non-linear features
 
 | Metric | Out-Of-Fold Cross-Validation | Benchmark / Leaderboard |
 | :--- | :--- | :--- |
-| ROC-AUC | 0.96468 | 0.96578+ (Baseline: 0.92374) |
+| ROC-AUC | 0.96468 | 0.96584 (Baseline: 0.92374) |
 | F1-Score | 0.93251 | - |
 | Accuracy | 90.37% | - |
 | Precision | 92.73% | - |
