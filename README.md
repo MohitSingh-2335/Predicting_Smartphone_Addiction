@@ -29,38 +29,43 @@ The dataset contains information across multiple behavioral and lifestyle dimens
 - Examined target class balance (~70.9% addicted vs 29.1% non-addicted).
 
 ### 2. Feature Engineering
-Created domain-specific interaction and ratio features to capture addiction patterns:
+Created 60 domain-specific interaction, ratio, and behavioral features to capture addiction patterns:
+- `non_study_screen_hours`: Non-productive screen time (`daily_screen_time_hours - work_study_hours`).
+- `non_study_to_sleep_ratio`: Ratio of non-study screen time to sleep hours.
 - `entertainment_hours`: Total recreational screen time (`social_media_hours + gaming_hours`).
 - `entertainment_ratio`: Proportion of daily screen time spent on entertainment.
 - `unproductive_to_productive`: Ratio of entertainment hours to work and study hours.
 - `screen_time_to_awake_ratio`: Proportion of waking hours spent looking at a screen (`daily_screen_time_hours / (24 - sleep_hours)`).
 - `free_awake_hours`: Free waking hours excluding work and study (`(24 - sleep_hours) - work_study_hours`).
 - `screen_to_free_awake_ratio`: Proportion of free awake hours spent on entertainment screen activities.
+- `high_screen_low_sleep`: High risk flag for >= 8h screen time and <= 5h sleep.
+- `high_notif_high_open`: High risk interaction flag for notifications and app opens.
+- `severe_impact_stress`: Compound flag for severe academic work impact combined with high stress.
 - `unaccounted_screen_time`: Screen time beyond social media, gaming, and study.
 - `screen_sleep_sq`: Quadratic interaction between daily screen exposure and sleep deprivation.
 - `notifications_per_awake_hour`: Notification density during active waking hours.
 - `minutes_per_app_open`: Average duration spent per app open.
 - `weekend_vs_daily_diff`: Increase in screen time during weekends.
 - `num_missing`: Count of missing fields per record.
+- `user_cluster`: Behavioral archetype clustering using MiniBatchKMeans.
 
 ### 3. Data Preprocessing
 - Encoded categorical variables (`gender`, `academic_work_impact`, `stress_level`) into numerical formats.
 - Retained the complete dataset (691,369 samples) without discarding rows with missing values.
 
 ### 4. Model Training and Cross-Validation
-- Implemented an Ultra 10-Fold Stratified Triple-Ensemble combining `LightGBM` (leaf-wise gradient boosting), `HistGradientBoostingClassifier`, and `XGBoost` (histogram tree method) across 49 engineered features.
-- Incorporated behavioral archetype clustering (MiniBatchKMeans), categorical interaction codes, frequency encodings, and component breakdowns.
-- Trained on 90% of the dataset per fold (622,000 samples) with 30 total models ensembled (10 folds x 3 architectures) for optimal variance reduction and calibration.
+- Implemented a Grandmaster 10-Fold Stratified Triple-Ensemble combining `LightGBM` (leaf-wise gradient boosting), `HistGradientBoostingClassifier`, and `XGBoost` (histogram tree method) across 60 engineered features.
+- Trained on 90% of the dataset per fold (622,000 samples) with 30 total models ensembled (10 folds x 3 architectures) with calibrated weights (45% LightGBM + 15% HistGBM + 40% XGBoost).
 
 ## Results and Benchmark
 
-| Metric | Out-Of-Fold Cross-Validation | Leaderboard Score |
+| Metric | Out-Of-Fold Cross-Validation | Benchmark / Leaderboard |
 | :--- | :--- | :--- |
-| ROC-AUC | 0.96452 | 0.96567 (Baseline: 0.92374) |
-| F1-Score | 0.93233 | - |
-| Accuracy | 90.35% | - |
-| Precision | 92.73% | - |
-| Recall | 93.75% | - |
+| ROC-AUC | 0.96466 | 0.96567 (Baseline: 0.92374) |
+| F1-Score | 0.93250 | - |
+| Accuracy | 90.37% | - |
+| Precision | 92.71% | - |
+| Recall | 93.79% | - |
 
 ## Project Structure
 ```text
@@ -82,5 +87,7 @@ Predicting_Smartphone_Addiction/
 - pandas
 - numpy
 - scikit-learn
+- lightgbm
+- xgboost
 - matplotlib
 - seaborn
