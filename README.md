@@ -26,10 +26,14 @@ The dataset contains information across multiple behavioral and lifestyle dimens
 
 ### 1. Exploratory Data Analysis (EDA)
 - Analyzed feature distributions and missing values across both training and test sets.
-- Examined target class balance (~70.9% addicted vs 29.1% non-addicted).
+- Examined target class balance (~68.3% addicted vs 31.7% non-addicted).
 
 ### 2. Feature Engineering
-Created 75 domain-specific interaction, ratio, temporal, non-linear, and clustered features to capture addiction patterns:
+Created 78 domain-specific interaction, generator budget residual, circadian ratio, temporal, micro-interaction, and categorical interaction features:
+- `accounted_screen_time`: Sum of social media, gaming, and work/study hours.
+- `unaccounted_screen_time`: Latent budget discrepancy (`daily_screen_time_hours - accounted_screen_time`).
+- `unaccounted_ratio`: Ratio of unaccounted screen time to total screen time.
+- `weekend_budget_residual`: Latent budget residual for weekend duration.
 - `non_study_screen_hours`: Non-productive screen time (`daily_screen_time_hours - work_study_hours`).
 - `non_study_to_sleep_ratio`: Ratio of non-study screen time to sleep hours.
 - `entertainment_hours`: Total recreational screen time (`social_media_hours + gaming_hours`).
@@ -41,8 +45,6 @@ Created 75 domain-specific interaction, ratio, temporal, non-linear, and cluster
 - `high_screen_low_sleep`: High risk flag for >= 8h screen time and <= 5h sleep.
 - `high_notif_high_open`: High risk interaction flag for notifications and app opens.
 - `severe_impact_stress`: Compound flag for severe academic work impact combined with high stress.
-- `unaccounted_screen_time`: Screen time beyond social media, gaming, and study.
-- `screen_sleep_sq`: Quadratic interaction between daily screen exposure and sleep deprivation.
 - `notifications_per_awake_hour`: Notification density during active waking hours.
 - `minutes_per_app_open`: Average duration spent per app open.
 - `compulsive_check_rate`: Frequency of app opens per minute of active screen time.
@@ -51,25 +53,27 @@ Created 75 domain-specific interaction, ratio, temporal, non-linear, and cluster
 - `addiction_index_v2`: Weighted composite indicator combining non-study screen hours, recreational use, notifications, and sleep deprivation.
 - `extreme_screen_flag` and `severe_sleep_debt`: Binary flags for extreme behavioral habits (>12h screen or <4.5h sleep).
 - `num_missing`: Count of missing fields per record.
-- `user_cluster`: Behavioral archetype clustering using MiniBatchKMeans (8 clusters).
+- `stress_academic_combo_code`, `gender_stress_combo_code`, `triple_combo_code`: High-cardinality multi-way interaction codes.
 
 ### 3. Data Preprocessing
-- Encoded categorical variables (`gender`, `academic_work_impact`, `stress_level`) into numerical formats.
+- Encoded categorical variables (`gender`, `academic_work_impact`, `stress_level`) into numerical formats and interaction codes.
 - Retained the complete dataset (691,369 samples) without discarding rows with missing values.
 
 ### 4. Model Training and Cross-Validation
-- Implemented a Dual-Seed Bagged 10-Fold Stratified Grandmaster Ensemble combining `LightGBM` (leaf-wise gradient boosting), `HistGradientBoostingClassifier`, and `XGBoost` (histogram tree method) across 75 engineered features.
-- Multi-seed bagging (Seed 42 and Seed 2026) across 10 folds produces 60 total models (20x LightGBM + 20x XGBoost + 20x HistGBM) ensembled with calibrated weights (45% LightGBM + 40% XGBoost + 15% HistGBM).
+- Implemented a 4-Family Diverse 10-Fold Stratified Ensemble combining `LightGBM` (leaf-wise gradient boosting with 190 leaves, depth 12), `XGBoost` (histogram tree method with depth 9), `CatBoost` (symmetric oblivious trees), and `HistGradientBoostingClassifier` (scikit-learn monotonic booster) across 78 engineered features.
+- Total of 40 models trained across 10 folds.
+- Predictions converted to uniform percentile ranks (`rankdata(p) / len(p)`) and meta-optimized using Nelder-Mead optimization on honest out-of-fold predictions.
 
 ## Results and Benchmark
 
-| Metric | Out-Of-Fold Cross-Validation | Benchmark / Leaderboard |
+| Metric | Standalone / OOF CV | Ensemble Result |
 | :--- | :--- | :--- |
-| ROC-AUC | 0.96466 | 0.96584+ (Baseline: 0.92374) |
-| F1-Score | 0.93255 | - |
-| Accuracy | 90.37% | - |
-| Precision | 92.73% | - |
-| Recall | 93.79% | - |
+| LightGBM Full OOF ROC-AUC | 0.96417 | - |
+| HistGBM Full OOF ROC-AUC | 0.96371 | - |
+| XGBoost Full OOF ROC-AUC | 0.96358 | - |
+| CatBoost Full OOF ROC-AUC | 0.95811 | - |
+| 4-Family Rank Ensemble OOF ROC-AUC | - | 0.96432 |
+| Previous Best Public Leaderboard | - | 0.96584 |
 
 ## Project Structure
 ```text
@@ -93,5 +97,7 @@ Predicting_Smartphone_Addiction/
 - scikit-learn
 - lightgbm
 - xgboost
+- catboost
+- scipy
 - matplotlib
 - seaborn
