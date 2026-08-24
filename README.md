@@ -61,7 +61,7 @@ Created 60 domain-specific interaction, ratio, and behavioral features to captur
 
 | Metric | Out-Of-Fold Cross-Validation | Benchmark / Leaderboard |
 | :--- | :--- | :--- |
-| ROC-AUC | 0.96466 | 0.96567 (Baseline: 0.92374) |
+| ROC-AUC | 0.96466 | 0.96578 (Baseline: 0.92374) |
 | F1-Score | 0.93250 | - |
 | Accuracy | 90.37% | - |
 | Precision | 92.71% | - |
