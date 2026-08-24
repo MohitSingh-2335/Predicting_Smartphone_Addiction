@@ -25,15 +25,16 @@ The dataset contains information across multiple behavioral and lifestyle dimens
 ## Methodology and Pipeline
 
 ### 1. Exploratory Data Analysis (EDA)
-- Analyzed feature distributions and missing values across both training and test sets.
-- Examined target class balance (~68.3% addicted vs 31.7% non-addicted).
+- Analyzed feature distributions and missing values across both training (691,369 samples) and test (296,302 samples) sets.
+- Evaluated target class balance (~68.3% addicted vs 31.7% non-addicted).
+- Discovered synthetic generator mathematical constraints where screen time components do not sum to total screen time, creating strong budget residuals.
 
-### 2. Feature Engineering
-Created 78 domain-specific interaction, generator budget residual, circadian ratio, temporal, micro-interaction, and categorical interaction features:
+### 2. Feature Engineering & Generator Budget Residuals
+Created 77 domain-specific features capturing generator budget residuals, circadian dynamics, compulsive micro-interaction metrics, and interaction flags:
 - `accounted_screen_time`: Sum of social media, gaming, and work/study hours.
 - `unaccounted_screen_time`: Latent budget discrepancy (`daily_screen_time_hours - accounted_screen_time`).
 - `unaccounted_ratio`: Ratio of unaccounted screen time to total screen time.
-- `weekend_budget_residual`: Latent budget residual for weekend duration.
+- `weekend_budget_residual`: Latent budget residual for weekend duration (`weekend_screen_time - 2 * (social + gaming + work)`).
 - `non_study_screen_hours`: Non-productive screen time (`daily_screen_time_hours - work_study_hours`).
 - `non_study_to_sleep_ratio`: Ratio of non-study screen time to sleep hours.
 - `entertainment_hours`: Total recreational screen time (`social_media_hours + gaming_hours`).
@@ -53,27 +54,31 @@ Created 78 domain-specific interaction, generator budget residual, circadian rat
 - `addiction_index_v2`: Weighted composite indicator combining non-study screen hours, recreational use, notifications, and sleep deprivation.
 - `extreme_screen_flag` and `severe_sleep_debt`: Binary flags for extreme behavioral habits (>12h screen or <4.5h sleep).
 - `num_missing`: Count of missing fields per record.
-- `stress_academic_combo_code`, `gender_stress_combo_code`, `triple_combo_code`: High-cardinality multi-way interaction codes.
 
-### 3. Data Preprocessing
-- Encoded categorical variables (`gender`, `academic_work_impact`, `stress_level`) into numerical formats and interaction codes.
-- Retained the complete dataset (691,369 samples) without discarding rows with missing values.
+### 3. Out-of-Fold Target Encoding
+- Computed strict out-of-fold target encoding on high-variance discrete lookup features (`notifications_per_day` and `app_opens_per_day`).
+- Mappings were derived strictly on training splits and mapped to validation and test folds, eliminating any data leakage while providing strong conditional target risk signals to tree split algorithms.
 
-### 4. Model Training and Cross-Validation
-- Implemented a 4-Family Diverse 10-Fold Stratified Ensemble combining `LightGBM` (leaf-wise gradient boosting with 190 leaves, depth 12), `XGBoost` (histogram tree method with depth 9), `CatBoost` (symmetric oblivious trees), and `HistGradientBoostingClassifier` (scikit-learn monotonic booster) across 78 engineered features.
-- Total of 40 models trained across 10 folds.
-- Predictions converted to uniform percentile ranks (`rankdata(p) / len(p)`) and meta-optimized using Nelder-Mead optimization on honest out-of-fold predictions.
+### 4. 10-Fold Stratified Tri-Model Ensemble
+- Implemented a 10-Fold Stratified Cross-Validation pipeline combining:
+  1. `LightGBM Classifier` (50% weight): Deep leaf-wise gradient booster (`num_leaves=180`, `max_depth=12`, `feature_fraction=0.60`, `learning_rate=0.025`).
+  2. `XGBoost Classifier` (35% weight): Histogram-based tree booster (`max_depth=8`, `colsample_bytree=0.60`, `subsample=0.80`, `learning_rate=0.030`).
+  3. `HistGradientBoostingClassifier` (15% weight): Bin-based gradient booster (`max_leaf_nodes=160`, `l2_regularization=0.5`, `learning_rate=0.040`).
+- Probability blending preserved confidence margins for confident predictions.
 
 ## Results and Benchmark
 
-| Metric | Standalone / OOF CV | Ensemble Result |
+| Metric | Standalone / OOF CV | SOTA 10-Fold Ensemble |
 | :--- | :--- | :--- |
-| LightGBM Full OOF ROC-AUC | 0.96417 | - |
-| HistGBM Full OOF ROC-AUC | 0.96371 | - |
-| XGBoost Full OOF ROC-AUC | 0.96358 | - |
-| CatBoost Full OOF ROC-AUC | 0.95811 | - |
-| 4-Family Rank Ensemble OOF ROC-AUC | - | 0.96432 |
-| Previous Best Public Leaderboard | - | 0.96584 |
+| LightGBM Full OOF ROC-AUC | 0.96580 | - |
+| XGBoost Full OOF ROC-AUC | 0.96575 | - |
+| HistGBM Full OOF ROC-AUC | 0.96454 | - |
+| 10-Fold Triple Ensemble OOF ROC-AUC | - | 0.96589 |
+| Overall Classification Accuracy | - | 90.54% |
+| F1-Score | - | 0.93359 |
+| Precision | - | 0.93000 |
+| Recall | - | 0.93721 |
+| Peak Individual Fold AUC | - | 0.96696 |
 
 ## Project Structure
 ```text
@@ -97,7 +102,5 @@ Predicting_Smartphone_Addiction/
 - scikit-learn
 - lightgbm
 - xgboost
-- catboost
-- scipy
 - matplotlib
 - seaborn
