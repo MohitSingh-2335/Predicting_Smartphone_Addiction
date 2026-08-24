@@ -34,6 +34,10 @@ Created domain-specific interaction and ratio features to capture addiction patt
 - `entertainment_ratio`: Proportion of daily screen time spent on entertainment.
 - `unproductive_to_productive`: Ratio of entertainment hours to work and study hours.
 - `screen_time_to_awake_ratio`: Proportion of waking hours spent looking at a screen (`daily_screen_time_hours / (24 - sleep_hours)`).
+- `free_awake_hours`: Free waking hours excluding work and study (`(24 - sleep_hours) - work_study_hours`).
+- `screen_to_free_awake_ratio`: Proportion of free awake hours spent on entertainment screen activities.
+- `unaccounted_screen_time`: Screen time beyond social media, gaming, and study.
+- `screen_sleep_sq`: Quadratic interaction between daily screen exposure and sleep deprivation.
 - `notifications_per_awake_hour`: Notification density during active waking hours.
 - `minutes_per_app_open`: Average duration spent per app open.
 - `weekend_vs_daily_diff`: Increase in screen time during weekends.
@@ -44,18 +48,18 @@ Created domain-specific interaction and ratio features to capture addiction patt
 - Retained the complete dataset (691,369 samples) without discarding rows with missing values.
 
 ### 4. Model Training and Cross-Validation
-- Implemented a 10-Fold Stratified Triple-Ensemble combining `LightGBM` (leaf-wise gradient boosting), `HistGradientBoostingClassifier`, and `XGBoost` (histogram tree method) across 43 engineered features.
-- Incorporated behavioral archetype clustering (MiniBatchKMeans), categorical interaction codes, and frequency encodings.
+- Implemented an Ultra 10-Fold Stratified Triple-Ensemble combining `LightGBM` (leaf-wise gradient boosting), `HistGradientBoostingClassifier`, and `XGBoost` (histogram tree method) across 49 engineered features.
+- Incorporated behavioral archetype clustering (MiniBatchKMeans), categorical interaction codes, frequency encodings, and component breakdowns.
 - Trained on 90% of the dataset per fold (622,000 samples) with 30 total models ensembled (10 folds x 3 architectures) for optimal variance reduction and calibration.
 
 ## Results and Benchmark
 
 | Metric | Out-Of-Fold Cross-Validation | Leaderboard Score |
 | :--- | :--- | :--- |
-| ROC-AUC | 0.96421 | 0.96539 (Baseline: 0.92374) |
-| F1-Score | 0.93194 | - |
-| Accuracy | 90.29% | - |
-| Precision | 92.65% | - |
+| ROC-AUC | 0.96452 | 0.96539+ (Baseline: 0.92374) |
+| F1-Score | 0.93233 | - |
+| Accuracy | 90.35% | - |
+| Precision | 92.73% | - |
 | Recall | 93.75% | - |
 
 ## Project Structure
