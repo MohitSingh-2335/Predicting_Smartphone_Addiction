@@ -30,7 +30,7 @@ The dataset contains information across multiple behavioral and lifestyle dimens
 - Discovered synthetic generator mathematical constraints where screen time components do not sum to total screen time, creating strong budget residuals.
 
 ### 2. Feature Engineering & Generator Budget Residuals
-Created 77 domain-specific features capturing generator budget residuals, circadian dynamics, compulsive micro-interaction metrics, and interaction flags:
+Created 78 domain-specific features capturing generator budget residuals, circadian dynamics, compulsive micro-interaction metrics, and interaction flags:
 - `accounted_screen_time`: Sum of social media, gaming, and work/study hours.
 - `unaccounted_screen_time`: Latent budget discrepancy (`daily_screen_time_hours - accounted_screen_time`).
 - `unaccounted_ratio`: Ratio of unaccounted screen time to total screen time.
@@ -55,31 +55,32 @@ Created 77 domain-specific features capturing generator budget residuals, circad
 - `extreme_screen_flag` and `severe_sleep_debt`: Binary flags for extreme behavioral habits (>12h screen or <4.5h sleep).
 - `num_missing`: Count of missing fields per record.
 
-### 3. Out-of-Fold Target Encoding
-- Computed strict out-of-fold target encoding on high-variance discrete lookup features (`notifications_per_day` and `app_opens_per_day`).
-- Mappings were derived strictly on training splits and mapped to validation and test folds, eliminating any data leakage while providing strong conditional target risk signals to tree split algorithms.
+### 3. Bayesian Smoothed Out-of-Fold Target Encoding
+- Computed leak-free Bayesian smoothed target encoding across discrete lookup features (`notifications_per_day`, `app_opens_per_day`, `age`, and `stress_academic_combo_code`).
+- Smoothing formulation: `(count * mean + 20 * global_mean) / (count + 20)`.
+- Mappings derived strictly on training splits and mapped to validation and test folds.
 
-### 4. 10-Fold Stratified Tri-Model Ensemble
-- Implemented a 10-Fold Stratified Cross-Validation pipeline combining:
-  1. `LightGBM Classifier` (50% weight): Deep leaf-wise gradient booster (`num_leaves=180`, `max_depth=12`, `feature_fraction=0.60`, `learning_rate=0.025`).
-  2. `XGBoost Classifier` (35% weight): Histogram-based tree booster (`max_depth=8`, `colsample_bytree=0.60`, `subsample=0.80`, `learning_rate=0.030`).
-  3. `HistGradientBoostingClassifier` (15% weight): Bin-based gradient booster (`max_leaf_nodes=160`, `l2_regularization=0.5`, `learning_rate=0.040`).
-- Probability blending preserved confidence margins for confident predictions.
+### 4. Dual-Seed 10-Fold Stratified Ensemble (60 Models)
+- Implemented a Dual-Seed 10-Fold Stratified Cross-Validation pipeline (Seed 42 and Seed 2024) training 60 total deep models:
+  1. `LightGBM Classifier` (20 models): Deep leaf-wise gradient booster (`num_leaves=180`, `max_depth=12`, `feature_fraction=0.60`, `learning_rate=0.025`).
+  2. `XGBoost Classifier` (20 models): Histogram-based tree booster (`max_depth=8`, `colsample_bytree=0.60`, `subsample=0.80`, `learning_rate=0.030`).
+  3. `HistGradientBoostingClassifier` (20 models): Bin-based gradient booster (`max_leaf_nodes=160`, `l2_regularization=0.5`, `learning_rate=0.040`).
+- Averaging across both random seeds minimizes partition variance and sharpens classification margins.
 
 ## Results and Benchmark
 
-| Metric | Standalone / OOF CV | SOTA 10-Fold Ensemble |
+| Metric | Standalone / OOF CV | Dual-Seed 60-Model Ensemble |
 | :--- | :--- | :--- |
-| LightGBM Full OOF ROC-AUC | 0.96580 | - |
-| XGBoost Full OOF ROC-AUC | 0.96575 | - |
-| HistGBM Full OOF ROC-AUC | 0.96454 | - |
-| 10-Fold Triple Ensemble OOF ROC-AUC | - | 0.96589 |
-| Overall Classification Accuracy | - | 90.54% |
-| F1-Score | - | 0.93359 |
-| Precision | - | 0.93000 |
-| Recall | - | 0.93721 |
-| Peak Individual Fold AUC | - | 0.96696 |
-| **Verified Public Leaderboard ROC-AUC** | - | **0.96719** |
+| Dual-Seed Bagged LightGBM OOF ROC-AUC | 0.96602 | - |
+| Dual-Seed Bagged XGBoost OOF ROC-AUC | 0.96592 | - |
+| Dual-Seed Bagged HistGBM OOF ROC-AUC | 0.96471 | - |
+| **Dual-Seed 10-Fold Ensemble OOF ROC-AUC** | - | **0.96616** |
+| **Overall Classification Accuracy** | - | **90.58%** |
+| **F1-Score** | - | **0.93390** |
+| **Precision** | - | **0.93023** |
+| **Recall** | - | **0.93760** |
+| **Peak Individual Fold AUC** | - | **0.96697** |
+| **Verified Previous Public Leaderboard** | - | **0.96719** |
 
 ## Project Structure
 ```text
@@ -103,5 +104,6 @@ Predicting_Smartphone_Addiction/
 - scikit-learn
 - lightgbm
 - xgboost
+- scipy
 - matplotlib
 - seaborn
