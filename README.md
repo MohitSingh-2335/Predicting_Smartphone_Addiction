@@ -80,7 +80,7 @@ Created 78 domain-specific features capturing generator budget residuals, circad
 | **Precision** | - | **0.93023** |
 | **Recall** | - | **0.93760** |
 | **Peak Individual Fold AUC** | - | **0.96697** |
-| **Verified Previous Public Leaderboard** | - | **0.96719** |
+| **Verified Public Leaderboard ROC-AUC** | - | **0.96745** |
 
 ## Project Structure
 ```text
