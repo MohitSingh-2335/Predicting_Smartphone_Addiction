@@ -29,16 +29,19 @@ The dataset contains information across multiple behavioral and lifestyle dimens
 - Evaluated target class balance (~68.3% addicted vs 31.7% non-addicted).
 - Discovered synthetic generator mathematical constraints where screen time components do not sum to total screen time, creating strong budget residuals.
 
-### 2. Feature Engineering & Synthetic Generator Footprints
-1. **Extended Decimal Lattice Features**:
+### 2. Feature Engineering & Multi-Frequency Encodings
+1. **Multi-Frequency Trigonometric Lookups**:
+   - High-frequency periodic transformations (`sin` and `cos` with periods 10.0, 20.0, 50.0) applied to discrete generator lookup keys (`notifications_per_day`, `app_opens_per_day`, `age`).
+   - Enables tree partition algorithms to capture complex disjoint interval unions and recurring synthetic table patterns.
+2. **Extended Decimal Lattice & Remainder Trigonometry**:
    - `frac_col`: Continuous sub-unit remainder (`value - floor(value)`) capturing generator decimal distributions.
-   - `d1_col`: First decimal digit (`floor(value * 10) % 10`) exposing discretization artifacts.
-   - `is_int_col`: Binary indicator for exact integer measurements (`frac == 0`).
-   - `is_half_col`: Binary indicator for half-unit increments (`frac == 0.5`).
+   - `d1_col`: First decimal digit (`floor(frac * 10)`) exposing discretization boundaries.
+   - `is_int_col` & `is_half_col`: Binary indicator flags for exact integer and half-unit measurements.
+   - `sin_frac` & `cos_frac`: Trigonometric coordinates on remainder circles (`2 * pi * frac`).
    - Applied across continuous columns: `daily_screen_time_hours`, `social_media_hours`, `gaming_hours`, `work_study_hours`, `sleep_hours`, `weekend_screen_time`.
-2. **Transductive Population Frequency Encodings**:
+3. **Transductive Population Frequency Encodings**:
    - Empirical frequency statistics computed across the combined pool of training and test sets to capture generator discretization density without target leakage.
-3. **Generator Budget Constraints & Discrepancies**:
+4. **Generator Budget Constraints & Discrepancies**:
    - `accounted_screen_time`: Sum of social media, gaming, and work/study hours.
    - `unaccounted_screen_time`: Latent budget discrepancy (`daily_screen_time_hours - accounted_screen_time`).
    - `unaccounted_ratio`: Ratio of unaccounted screen time to total screen time.
@@ -47,7 +50,7 @@ The dataset contains information across multiple behavioral and lifestyle dimens
    - `entertainment_hours`: Total recreational screen time (`social_media_hours + gaming_hours`).
    - `entertainment_ratio`: Proportion of daily screen time spent on entertainment.
    - `unproductive_to_productive`: Ratio of entertainment hours to work and study hours.
-4. **Circadian Dynamics & Micro-Interactions**:
+5. **Circadian Dynamics & Micro-Interactions**:
    - `awake_hours`: `24.0 - sleep_hours`.
    - `free_awake_hours`: Active waking hours excluding work and study.
    - `screen_time_to_awake_ratio`: Proportion of waking hours spent on screens.
@@ -61,12 +64,12 @@ The dataset contains information across multiple behavioral and lifestyle dimens
    - `addiction_index_v2`: Weighted composite indicator combining non-study screen hours, recreational use, notifications, and sleep deprivation.
    - `high_screen_low_sleep`, `high_notif_high_open`, `severe_impact_stress`: Risk flags.
 
-### 3. Leak-Free All-Column Nested Target Encoding
-- Applied nested 5-fold out-of-fold Bayesian smoothed target encoding across all 12 raw continuous and categorical features.
+### 3. Leak-Free 10-Fold Nested Bayesian Target Encoding
+- Applied nested 10-fold out-of-fold Bayesian smoothed target encoding across all 12 raw continuous and categorical features.
 - Explicit string level `__missing__` assigned to missing values to preserve missingness distribution.
-- Prior smoothing factor `m = 10.0` with simultaneous frequency encodings.
+- Prior smoothing factor `m = 10.0` with simultaneous in-fold frequency encodings.
 
-### 4. Titan Dual-Seed 10-Fold 4-Model Diverse Deep Ensemble (80 Models)
+### 4. Apex Dual-Seed 10-Fold 4-Model Diverse Deep Ensemble (80 Models)
 - Implemented a Dual-Seed (Seeds 42 & 2024) 10-Fold Stratified Cross-Validation pipeline combining 4 diverse gradient boosting architectures (80 models total):
   1. `LightGBM Classifier` (20 models): Leaf-wise booster (`num_leaves=190`, `max_depth=12`, `feature_fraction=0.60`, `learning_rate=0.025`, `n_estimators=1700`).
   2. `XGBoost Classifier` (20 models): Histogram-based tree booster (`max_depth=8`, `colsample_bytree=0.60`, `subsample=0.80`, `learning_rate=0.030`, `n_estimators=1200`).
@@ -76,19 +79,19 @@ The dataset contains information across multiple behavioral and lifestyle dimens
 
 ## Results and Benchmark
 
-| Metric | Standalone / OOF CV | Titan Dual-Seed 80-Model Ensemble |
+| Metric | Standalone / OOF CV | Apex Dual-Seed 80-Model Ensemble |
 | :--- | :--- | :--- |
-| Bagged Dual-Seed LightGBM OOF AUC | 0.96840 | - |
-| Bagged Dual-Seed XGBoost OOF AUC | 0.96844 | - |
-| Bagged Dual-Seed CatBoost OOF AUC | 0.96791 | - |
-| Bagged Dual-Seed HistGBM OOF AUC | 0.96756 | - |
-| **Dual-Seed 10-Fold 4-Model Ensemble OOF ROC-AUC** | - | **0.96853** |
-| **Overall Classification Accuracy** | - | **90.94%** |
-| **F1-Score** | - | **0.93608** |
-| **Precision** | - | **0.93698** |
-| **Recall** | - | **0.93518** |
-| **Peak Individual Fold AUC** | - | **0.96942** |
-| **Verified Public Leaderboard ROC-AUC** | - | **0.96956** |
+| Bagged Dual-Seed LightGBM OOF AUC | 0.96857 | - |
+| Bagged Dual-Seed XGBoost OOF AUC | 0.96859 | - |
+| Bagged Dual-Seed CatBoost OOF AUC | 0.96813 | - |
+| Bagged Dual-Seed HistGBM OOF AUC | 0.96771 | - |
+| **Dual-Seed 10-Fold 4-Model Ensemble OOF ROC-AUC** | - | **0.96870** |
+| **Overall Classification Accuracy** | - | **90.97%** |
+| **F1-Score** | - | **0.93639** |
+| **Precision** | - | **0.93577** |
+| **Recall** | - | **0.93702** |
+| **Peak Individual Fold AUC** | - | **0.96959** |
+| **Previous Verified Public Leaderboard ROC-AUC** | - | **0.96956** |
 
 ## Progression History Across Iterations
 
@@ -106,7 +109,8 @@ The dataset contains information across multiple behavioral and lifestyle dimens
 | 10 | Dual-Seed 60-Model Ensemble + Bayesian TE | 78 | 0.96616 | 0.96745 |
 | 11 | Titan Tri-Seed 90-Model Deep Ensemble | 78 | 0.96617 | 0.96734 |
 | 12 | Breakthrough 10-Fold 4-Model Ensemble | 71 | 0.96822 | 0.96936 |
-| 13 | **Titan Dual-Seed 80-Model SOTA Ensemble** | **95** | **0.96853** | **0.96956** |
+| 13 | Titan Dual-Seed 80-Model SOTA Ensemble | 95 | 0.96853 | 0.96956 |
+| 14 | **Apex Dual-Seed 80-Model SOTA Ensemble** | **125** | **0.96870** | **Pending Submission** |
 
 ## Project Structure
 ```text
