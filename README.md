@@ -84,7 +84,7 @@ The dataset contains information across multiple behavioral and lifestyle dimens
 | **Precision** | - | **0.93927** |
 | **Recall** | - | **0.93157** |
 | **Peak Individual Fold AUC** | - | **0.96889** |
-| **Verified Public Leaderboard ROC-AUC** | - | **0.96745** |
+| **Verified Public Leaderboard ROC-AUC** | - | **0.96936** |
 
 ## Progression History Across Iterations
 
@@ -99,9 +99,9 @@ The dataset contains information across multiple behavioral and lifestyle dimens
 | 7 | Grandmaster 10-Fold Triple Ensemble | 60 | 0.96568 | 0.96578 |
 | 8 | Ultra Grandmaster 10-Fold Triple Ensemble | 73 | 0.96574 | 0.96584 |
 | 9 | SOTA 10-Fold Ensemble + Budget Residuals | 77 | 0.96605 | 0.96719 |
-| 10 | Dual-Seed 60-Model Ensemble + Bayesian TE | 78 | 0.96616 | **0.96745** |
+| 10 | Dual-Seed 60-Model Ensemble + Bayesian TE | 78 | 0.96616 | 0.96745 |
 | 11 | Titan Tri-Seed 90-Model Deep Ensemble | 78 | 0.96617 | 0.96734 |
-| 12 | **Breakthrough 10-Fold 4-Model SOTA Ensemble** | **71** | **0.96822** | **Ready for Submission** |
+| 12 | **Breakthrough 10-Fold 4-Model SOTA Ensemble** | **71** | **0.96822** | **0.96936** |
 
 ## Project Structure
 ```text
