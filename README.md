@@ -91,7 +91,7 @@ The dataset contains information across multiple behavioral and lifestyle dimens
 | **Precision** | - | **0.93577** |
 | **Recall** | - | **0.93702** |
 | **Peak Individual Fold AUC** | - | **0.96959** |
-| **Previous Verified Public Leaderboard ROC-AUC** | - | **0.96956** |
+| **Verified Public Leaderboard ROC-AUC** | - | **0.96968** |
 
 ## Progression History Across Iterations
 
@@ -110,7 +110,7 @@ The dataset contains information across multiple behavioral and lifestyle dimens
 | 11 | Titan Tri-Seed 90-Model Deep Ensemble | 78 | 0.96617 | 0.96734 |
 | 12 | Breakthrough 10-Fold 4-Model Ensemble | 71 | 0.96822 | 0.96936 |
 | 13 | Titan Dual-Seed 80-Model SOTA Ensemble | 95 | 0.96853 | 0.96956 |
-| 14 | **Apex Dual-Seed 80-Model SOTA Ensemble** | **125** | **0.96870** | **Pending Submission** |
+| 14 | **Apex Dual-Seed 80-Model SOTA Ensemble** | **125** | **0.96870** | **0.96968** |
 
 ## Project Structure
 ```text
