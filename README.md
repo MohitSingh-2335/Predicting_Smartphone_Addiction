@@ -30,11 +30,15 @@ The dataset contains information across multiple behavioral and lifestyle dimens
 - Discovered synthetic generator mathematical constraints where screen time components do not sum to total screen time, creating strong budget residuals.
 
 ### 2. Feature Engineering & Synthetic Generator Footprints
-1. **Decimal Lattice Features**:
+1. **Extended Decimal Lattice Features**:
    - `frac_col`: Continuous sub-unit remainder (`value - floor(value)`) capturing generator decimal distributions.
    - `d1_col`: First decimal digit (`floor(value * 10) % 10`) exposing discretization artifacts.
-   - Applied across all continuous columns: `daily_screen_time_hours`, `social_media_hours`, `gaming_hours`, `work_study_hours`, `sleep_hours`, `weekend_screen_time`.
-2. **Generator Budget Constraints & Discrepancies**:
+   - `is_int_col`: Binary indicator for exact integer measurements (`frac == 0`).
+   - `is_half_col`: Binary indicator for half-unit increments (`frac == 0.5`).
+   - Applied across continuous columns: `daily_screen_time_hours`, `social_media_hours`, `gaming_hours`, `work_study_hours`, `sleep_hours`, `weekend_screen_time`.
+2. **Transductive Population Frequency Encodings**:
+   - Empirical frequency statistics computed across the combined pool of training and test sets to capture generator discretization density without target leakage.
+3. **Generator Budget Constraints & Discrepancies**:
    - `accounted_screen_time`: Sum of social media, gaming, and work/study hours.
    - `unaccounted_screen_time`: Latent budget discrepancy (`daily_screen_time_hours - accounted_screen_time`).
    - `unaccounted_ratio`: Ratio of unaccounted screen time to total screen time.
@@ -43,7 +47,7 @@ The dataset contains information across multiple behavioral and lifestyle dimens
    - `entertainment_hours`: Total recreational screen time (`social_media_hours + gaming_hours`).
    - `entertainment_ratio`: Proportion of daily screen time spent on entertainment.
    - `unproductive_to_productive`: Ratio of entertainment hours to work and study hours.
-3. **Circadian Dynamics & Micro-Interactions**:
+4. **Circadian Dynamics & Micro-Interactions**:
    - `awake_hours`: `24.0 - sleep_hours`.
    - `free_awake_hours`: Active waking hours excluding work and study.
    - `screen_time_to_awake_ratio`: Proportion of waking hours spent on screens.
@@ -62,29 +66,29 @@ The dataset contains information across multiple behavioral and lifestyle dimens
 - Explicit string level `__missing__` assigned to missing values to preserve missingness distribution.
 - Prior smoothing factor `m = 10.0` with simultaneous frequency encodings.
 
-### 4. Breakthrough 10-Fold 4-Model Diverse Deep Ensemble (40 Models)
-- Implemented a 10-Fold Stratified Cross-Validation pipeline combining 4 diverse tree-based gradient boosting architectures:
-  1. `LightGBM Classifier` (10 models): Leaf-wise booster (`num_leaves=180`, `max_depth=12`, `feature_fraction=0.60`, `learning_rate=0.025`, `n_estimators=1600`).
-  2. `XGBoost Classifier` (10 models): Histogram-based tree booster (`max_depth=8`, `colsample_bytree=0.60`, `subsample=0.80`, `learning_rate=0.030`, `n_estimators=1100`).
-  3. `CatBoost Classifier` (10 models): Symmetric oblivious decision trees (`depth=7`, `learning_rate=0.035`, `l2_leaf_reg=3.0`, `iterations=1400`).
-  4. `HistGradientBoostingClassifier` (10 models): Binned gradient booster (`max_leaf_nodes=180`, `l2_regularization=0.5`, `learning_rate=0.035`, `max_iter=280`).
-- Meta-optimized non-negative blending weights via Nelder-Mead on out-of-fold probability distributions.
+### 4. Titan Dual-Seed 10-Fold 4-Model Diverse Deep Ensemble (80 Models)
+- Implemented a Dual-Seed (Seeds 42 & 2024) 10-Fold Stratified Cross-Validation pipeline combining 4 diverse gradient boosting architectures (80 models total):
+  1. `LightGBM Classifier` (20 models): Leaf-wise booster (`num_leaves=190`, `max_depth=12`, `feature_fraction=0.60`, `learning_rate=0.025`, `n_estimators=1700`).
+  2. `XGBoost Classifier` (20 models): Histogram-based tree booster (`max_depth=8`, `colsample_bytree=0.60`, `subsample=0.80`, `learning_rate=0.030`, `n_estimators=1200`).
+  3. `CatBoost Classifier` (20 models): Symmetric oblivious decision trees (`depth=7`, `learning_rate=0.035`, `l2_leaf_reg=3.0`, `iterations=1400`).
+  4. `HistGradientBoostingClassifier` (20 models): Binned gradient booster (`max_leaf_nodes=190`, `l2_regularization=0.5`, `learning_rate=0.035`, `max_iter=280`).
+- Meta-optimized non-negative blending weights via Nelder-Mead on dual-seed out-of-fold probability distributions.
 
 ## Results and Benchmark
 
-| Metric | Standalone / OOF CV | Breakthrough 4-Model 10-Fold Ensemble |
+| Metric | Standalone / OOF CV | Titan Dual-Seed 80-Model Ensemble |
 | :--- | :--- | :--- |
-| Bagged LightGBM Full OOF AUC | 0.96797 | - |
-| Bagged XGBoost Full OOF AUC | 0.96803 | - |
-| Bagged CatBoost Full OOF AUC | 0.96765 | - |
-| Bagged HistGBM Full OOF AUC | 0.96721 | - |
-| **10-Fold 4-Model Ensemble OOF ROC-AUC** | - | **0.96822** |
-| **Overall Classification Accuracy** | - | **90.87%** |
-| **F1-Score** | - | **0.93541** |
-| **Precision** | - | **0.93927** |
-| **Recall** | - | **0.93157** |
-| **Peak Individual Fold AUC** | - | **0.96889** |
-| **Verified Public Leaderboard ROC-AUC** | - | **0.96936** |
+| Bagged Dual-Seed LightGBM OOF AUC | 0.96840 | - |
+| Bagged Dual-Seed XGBoost OOF AUC | 0.96844 | - |
+| Bagged Dual-Seed CatBoost OOF AUC | 0.96791 | - |
+| Bagged Dual-Seed HistGBM OOF AUC | 0.96756 | - |
+| **Dual-Seed 10-Fold 4-Model Ensemble OOF ROC-AUC** | - | **0.96853** |
+| **Overall Classification Accuracy** | - | **90.94%** |
+| **F1-Score** | - | **0.93608** |
+| **Precision** | - | **0.93698** |
+| **Recall** | - | **0.93518** |
+| **Peak Individual Fold AUC** | - | **0.96942** |
+| **Previous Verified Public Leaderboard ROC-AUC** | - | **0.96936** |
 
 ## Progression History Across Iterations
 
@@ -101,7 +105,8 @@ The dataset contains information across multiple behavioral and lifestyle dimens
 | 9 | SOTA 10-Fold Ensemble + Budget Residuals | 77 | 0.96605 | 0.96719 |
 | 10 | Dual-Seed 60-Model Ensemble + Bayesian TE | 78 | 0.96616 | 0.96745 |
 | 11 | Titan Tri-Seed 90-Model Deep Ensemble | 78 | 0.96617 | 0.96734 |
-| 12 | **Breakthrough 10-Fold 4-Model SOTA Ensemble** | **71** | **0.96822** | **0.96936** |
+| 12 | Breakthrough 10-Fold 4-Model Ensemble | 71 | 0.96822 | **0.96936** |
+| 13 | **Titan Dual-Seed 80-Model SOTA Ensemble** | **95** | **0.96853** | **Ready for Submission** |
 
 ## Project Structure
 ```text
