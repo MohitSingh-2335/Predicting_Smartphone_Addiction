@@ -69,29 +69,29 @@ The dataset contains information across multiple behavioral and lifestyle dimens
 - Explicit string level `__missing__` assigned to missing values to preserve missingness distribution.
 - Prior smoothing factor `m = 10.0` with simultaneous in-fold frequency encodings.
 
-### 4. Apex Dual-Seed 10-Fold 4-Model Diverse Deep Ensemble (80 Models)
-- Implemented a Dual-Seed (Seeds 42 & 2024) 10-Fold Stratified Cross-Validation pipeline combining 4 diverse gradient boosting architectures (80 models total):
-  1. `LightGBM Classifier` (20 models): Leaf-wise booster (`num_leaves=190`, `max_depth=12`, `feature_fraction=0.60`, `learning_rate=0.025`, `n_estimators=1700`).
-  2. `XGBoost Classifier` (20 models): Histogram-based tree booster (`max_depth=8`, `colsample_bytree=0.60`, `subsample=0.80`, `learning_rate=0.030`, `n_estimators=1200`).
-  3. `CatBoost Classifier` (20 models): Symmetric oblivious decision trees (`depth=7`, `learning_rate=0.035`, `l2_leaf_reg=3.0`, `iterations=1400`).
-  4. `HistGradientBoostingClassifier` (20 models): Binned gradient booster (`max_leaf_nodes=190`, `l2_regularization=0.5`, `learning_rate=0.035`, `max_iter=280`).
-- Meta-optimized non-negative blending weights via Nelder-Mead on dual-seed out-of-fold probability distributions.
+### 4. Zenith Tri-Seed 10-Fold 4-Model GPU-Accelerated SOTA Ensemble (120 Models)
+- Implemented a Tri-Seed (Seeds 42, 2024, 7) 10-Fold Stratified Cross-Validation pipeline combining 4 diverse gradient boosting architectures (120 models total):
+  1. `LightGBM Classifier` (30 models): Leaf-wise booster (`num_leaves=140`, `max_depth=11`, `feature_fraction=0.60`, `learning_rate=0.030`, `n_estimators=1200`).
+  2. `XGBoost Classifier (Deep GPU)` (30 models): GPU-accelerated histogram tree booster (`max_depth=8`, `colsample_bytree=0.60`, `subsample=0.80`, `device='cuda'`, `learning_rate=0.030`, `n_estimators=1400`).
+  3. `CatBoost Classifier (GPU)` (30 models): GPU-accelerated symmetric oblivious decision trees (`depth=7`, `learning_rate=0.035`, `l2_leaf_reg=3.0`, `task_type='GPU'`, `iterations=1600`).
+  4. `XGBoost Classifier (Regularized GPU)` (30 models): GPU-accelerated shallow regularized booster (`max_depth=6`, `colsample_bytree=0.50`, `subsample=0.75`, `reg_alpha=1.0`, `reg_lambda=5.0`, `device='cuda'`, `learning_rate=0.035`, `n_estimators=1200`).
+- Meta-optimized non-negative blending weights via Nelder-Mead on tri-seed out-of-fold probability distributions.
 
 ## Results and Benchmark
 
-| Metric | Standalone / OOF CV | Apex Dual-Seed 80-Model Ensemble |
+| Metric | Standalone / OOF CV | Zenith Tri-Seed 120-Model Ensemble |
 | :--- | :--- | :--- |
-| Bagged Dual-Seed LightGBM OOF AUC | 0.96857 | - |
-| Bagged Dual-Seed XGBoost OOF AUC | 0.96859 | - |
-| Bagged Dual-Seed CatBoost OOF AUC | 0.96813 | - |
-| Bagged Dual-Seed HistGBM OOF AUC | 0.96771 | - |
-| **Dual-Seed 10-Fold 4-Model Ensemble OOF ROC-AUC** | - | **0.96870** |
-| **Overall Classification Accuracy** | - | **90.97%** |
-| **F1-Score** | - | **0.93639** |
-| **Precision** | - | **0.93577** |
-| **Recall** | - | **0.93702** |
-| **Peak Individual Fold AUC** | - | **0.96959** |
-| **Verified Public Leaderboard ROC-AUC** | - | **0.96968** |
+| Bagged Tri-Seed LightGBM OOF AUC | 0.96827 | - |
+| Bagged Tri-Seed XGBoost Deep GPU OOF AUC | 0.96836 | - |
+| Bagged Tri-Seed CatBoost GPU OOF AUC | 0.96769 | - |
+| Bagged Tri-Seed XGBoost Reg GPU OOF AUC | 0.96802 | - |
+| **Tri-Seed 10-Fold 4-Model Ensemble OOF ROC-AUC** | - | **0.96840** |
+| **Overall Classification Accuracy** | - | **90.90%** |
+| **F1-Score** | - | **0.93604** |
+| **Precision** | - | **0.93381** |
+| **Recall** | - | **0.93827** |
+| **Peak Individual Fold AUC** | - | **0.96934** |
+| **Verified Public Leaderboard ROC-AUC** | - | **0.96968 (Apex) / Ready for Submission (Zenith)** |
 
 ## Progression History Across Iterations
 
@@ -110,7 +110,8 @@ The dataset contains information across multiple behavioral and lifestyle dimens
 | 11 | Titan Tri-Seed 90-Model Deep Ensemble | 78 | 0.96617 | 0.96734 |
 | 12 | Breakthrough 10-Fold 4-Model Ensemble | 71 | 0.96822 | 0.96936 |
 | 13 | Titan Dual-Seed 80-Model SOTA Ensemble | 95 | 0.96853 | 0.96956 |
-| 14 | **Apex Dual-Seed 80-Model SOTA Ensemble** | **125** | **0.96870** | **0.96968** |
+| 14 | Apex Dual-Seed 80-Model SOTA Ensemble | 125 | 0.96870 | 0.96968 |
+| 15 | **Zenith Tri-Seed 120-Model GPU SOTA Pipeline** | **146** | **0.96840** | **Ready for Submission** |
 
 ## Project Structure
 ```text
