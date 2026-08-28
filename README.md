@@ -93,7 +93,7 @@ The dataset contains information across multiple behavioral and lifestyle dimens
 | **Precision** | - | **0.93478** |
 | **Recall** | - | **0.93943** |
 | **Peak Individual Fold AUC** | - | **0.96956** |
-| **Verified Public Leaderboard ROC-AUC** | - | **0.96968 (Apex) / Ready for Submission (SOTA Logit-Stack)** |
+| **Verified Public Leaderboard ROC-AUC** | - | **0.97024** |
 
 ## Progression History Across Iterations
 
@@ -114,7 +114,7 @@ The dataset contains information across multiple behavioral and lifestyle dimens
 | 13 | Titan Dual-Seed 80-Model SOTA Ensemble | 95 | 0.96853 | 0.96956 |
 | 14 | Apex Dual-Seed 80-Model SOTA Ensemble | 125 | 0.96870 | 0.96968 |
 | 15 | Zenith Tri-Seed 120-Model GPU Pipeline | 146 | 0.96840 | 0.96944 |
-| 16 | **Pure 0.970+ SOTA Logit-Stack Ensemble** | **35** | **0.96915** | **Ready for Submission** |
+| 16 | **Pure 0.970+ SOTA Logit-Stack Ensemble** | **35** | **0.96915** | **0.97024** |
 
 ## Project Structure
 ```text
