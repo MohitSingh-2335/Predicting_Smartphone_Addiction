@@ -69,29 +69,34 @@ The dataset contains information across multiple behavioral and lifestyle dimens
 - Explicit string level `__missing__` assigned to missing values to preserve missingness distribution.
 - Prior smoothing factor `m = 10.0` with simultaneous in-fold frequency encodings.
 
-### 4. Ultra SOTA Top-100 Rank-01 Multi-Stream Ensemble Pipeline
-- Implemented a multi-stream ensembling architecture combining dual 50-model cross-fitted streams with Rank-01 Percentile Normalization:
-  - **Stream 1 (In-House SOTA 0.97024 Anchor)**: 50-model logit-stack ensemble across 10 stratified folds on Seed 42 combining XGBoost TE+Lattice, CatBoost Native Ordered TE, LightGBM TE+Lattice, Deep XGBoost Hist, and CatBoost Aug Ratios.
-  - **Stream 2 (Multi-Scale Engine on Seed 2026)**: 50-model multi-scale gradient boosted tree ensemble on Seed 2026 combining XGBoost Depth-6 Hist, XGBoost Depth-5 Regularized, LightGBM NumLeaves=63, Deep XGBoost Depth-8 Hist, and CatBoost Native Ordered TE.
-  - **Feature Enhancements**: Integer and half-integer arithmetic flags (`is_int`, `is_half`), exact decimal digits (`d1_col`), sub-unit position (`frac_col`), and transductive composition ratios.
-  - **Rank-01 Normalization & Dual Master Fusion**: Convex percentile rank combination ($R_{\text{final}} = 0.55 \cdot R_{\text{Stream1}} + 0.45 \cdot R_{\text{Stream2}}$) mapped uniformly onto $[0, 1]$ to optimize global ROC-AUC rank discrimination.
+### 4. Deep 60-Model GPU Meta-Stack & Grandmaster Dual-Engine Fusion
+- Implemented a 10-Fold Stratified Cross-Validation pipeline combining 6 distinct core deep model architectures with multi-seed logit-space meta-learning:
+  1. `Deep CatBoost Native Ordered TE` (10 models): GPU-accelerated symmetric decision trees using internal permutation-based ordered target statistics on raw string levels (`depth=7`, `learning_rate=0.032`, `iterations=2800`, `task_type='GPU'`).
+  2. `Deep XGBoost Hist` (10 models): Deep histogram tree booster on Bayesian target encodings and decimal lattice (`max_depth=8`, `learning_rate=0.022`, `subsample=0.80`, `colsample_bytree=0.70`, `device='cuda'`).
+  3. `XGBoost TE + Lattice` (10 models): Balanced histogram-based booster on Bayesian target encodings and decimal lattice (`max_depth=6`, `learning_rate=0.028`, `subsample=0.80`, `colsample_bytree=0.80`, `device='cuda'`).
+  4. `Regularized XGBoost` (10 models): Regularized shallow tree booster for smooth gradients (`max_depth=5`, `learning_rate=0.032`, `reg_alpha=1.5`, `reg_lambda=6.0`, `device='cuda'`).
+  5. `High-Capacity LightGBM` (10 models): Deep leaf-wise booster on Bayesian target encodings and decimal lattice (`num_leaves=127`, `max_depth=9`, `learning_rate=0.025`, `colsample_bytree=0.80`, `subsample=0.80`).
+  6. `CatBoost on Augmented Ratios` (10 models): Decorrelated ratio booster for subtractive error correction (`depth=6`, `learning_rate=0.040`, `iterations=2000`, `task_type='GPU'`).
+- Multi-Seed Cross-Fitted Logistic Regression logit meta-stacker averaged over seeds `[42, 2026, 777]` with $L_2$ regularization ($C=0.5$).
+- Grandmaster Dual-Engine Logit Fusion combining the Pure 50-Model Engine and Deep 60-Model Engine in uncompressed logit space.
 
 ## Results and Benchmark
 
-| Metric | Stream 1 Champion OOF | Stream 2 Multi-Scale OOF | Ultra SOTA Rank-01 Ensemble |
+| Metric | Standalone OOF AUC | Deep 60-Model GPU Meta-Stack | Grandmaster Dual-Engine Fusion |
 | :--- | :--- | :--- | :--- |
-| XGBoost Hist OOF AUC | 0.96883 | 0.96880 | - |
-| XGBoost Regularized OOF AUC | - | 0.96881 | - |
-| CatBoost Native Ordered TE OOF AUC | 0.96870 | 0.96836 | - |
-| LightGBM OOF AUC | 0.96866 | 0.96862 | - |
-| Deep XGBoost Hist OOF AUC | 0.96883 | 0.96882 | - |
-| **Stacked OOF ROC-AUC** | **0.96915** | **0.96903** | **Dual Master Fusion** |
-| **Overall Classification Accuracy** | 91.05% | 91.04% | **91.05%** |
-| **F1-Score** | 0.93710 | 0.93699 | **0.93710** |
-| **Precision** | 0.93478 | 0.93457 | **0.93478** |
-| **Recall** | 0.93943 | 0.93942 | **0.93943** |
-| **Peak Individual Fold AUC** | 0.96956 | 0.96979 | **0.96979** |
-| **Verified Public Leaderboard ROC-AUC** | **0.97024** | - | **Ready for Submission (Target 0.9715+)** |
+| Deep CatBoost Depth-7 OOF AUC | 0.96867 | - | - |
+| Deep XGBoost Depth-8 OOF AUC | 0.96885 | - | - |
+| XGBoost Depth-6 Hist OOF AUC | 0.96885 | - | - |
+| XGBoost Depth-5 Reg OOF AUC | 0.96883 | - | - |
+| LightGBM Num127 OOF AUC | 0.96864 | - | - |
+| CatBoost Augmented Ratios OOF AUC | 0.96077 | - | - |
+| **Final Stacked OOF ROC-AUC** | - | **0.96915** | **0.96920** |
+| **Overall Classification Accuracy** | - | **91.04%** | **91.05%** |
+| **F1-Score** | - | **0.93703** | **0.93710** |
+| **Precision** | - | **0.93484** | **0.93482** |
+| **Recall** | - | **0.93922** | **0.93940** |
+| **Peak Individual Fold AUC** | - | **0.96957** | **0.96957** |
+| **Public Leaderboard ROC-AUC** | - | - | **Ready for Submission (Target 0.9715+)** |
 
 ## Progression History Across Iterations
 
@@ -113,7 +118,8 @@ The dataset contains information across multiple behavioral and lifestyle dimens
 | 14 | Apex Dual-Seed 80-Model SOTA Ensemble | 125 | 0.96870 | 0.96968 |
 | 15 | Zenith Tri-Seed 120-Model GPU Pipeline | 146 | 0.96840 | 0.96944 |
 | 16 | Pure 0.970+ SOTA Logit-Stack Ensemble | 35 | 0.96915 | 0.97024 |
-| 17 | **Ultra SOTA Top-100 Rank-01 Multi-Stream Ensemble** | **37** | **0.96915** | **Ready for Submission** |
+| 17 | Rank-01 Multi-Stream Normalization | 37 | 0.96915 | 0.97019 |
+| 18 | **Deep 60-Model GPU Dual-Engine Meta-Stack** | **37** | **0.96920** | **Ready for Submission** |
 
 ## Project Structure
 ```text
