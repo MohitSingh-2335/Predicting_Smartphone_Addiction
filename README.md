@@ -63,34 +63,40 @@ Evaluation Metric: **Area Under the ROC Curve (ROC-AUC)**.
 
 ### 1. Synthetic Generator Invariants & Budget Discrepancies
 In real-world observational datasets, self-reported time allocations routinely contradict each other. However, in this competition's synthetic generator:
-$$\text{daily\_screen\_time\_hours} \ge \text{social\_media\_hours} + \text{gaming\_hours} + \text{work\_study\_hours}$$
+```text
+daily_screen_time_hours >= social_media_hours + gaming_hours + work_study_hours
+```
 with **zero arithmetic violations** across all 691,369 rows.
 - We engineered the latent budget residual:
-  $$\text{resid} = \text{daily} - (\text{social} + \text{gaming} + \text{work})$$
+```text
+resid = daily_screen_time_hours - (social_media_hours + gaming_hours + work_study_hours)
+```
 - Conditioning total daily screen time on its components produced a massive Simpson's reversal: marginally, `work_study_hours` appears harmful (AUC 0.6549), but holding total screen time constant, high work/study screen time drops the addiction rate from 35.8% to 0.6%.
 
 ### 2. The Decimal Lattice Remainder Geometry
 Because the continuous features were synthesized through discrete quantile/step generators, continuous variables retain sub-unit discretization artifacts:
-- **`frac_col`**: Sub-unit continuous remainder ($x - \lfloor x \rfloor$).
-- **`d1_col`**: First decimal digit ($\lfloor 10x \rfloor \pmod{10}$).
+- **`frac_col`**: Sub-unit continuous remainder (`value - floor(value)`).
+- **`d1_col`**: First decimal digit (`floor(value * 10) % 10`).
 - **`is_int_col` / `is_half_col`**: Exact integer and half-unit measurement indicators.
 
 > **Key Finding**: The first decimal digit of `daily_screen_time_hours` alone exhibits an **8.5% swing in the baseline addiction rate** (from 65.1% to 73.6%) across 50,000+ samples per digit. Decision trees on raw values cannot easily pool these disjoint remainder bins without explicit lattice features.
 
 ### 3. Discrete Lookup Table Keys (`notifications` & `app_opens`)
 Correlation analyses showed `notifications_per_day` and `app_opens_per_day` had near-zero linear correlation with the target. However:
-- Neighbouring integer values (e.g. 87 vs 88 notifications) exhibit target rate jumps of **0.22 on average**—22× larger than binomial sampling noise.
+- Neighbouring integer values (e.g. 87 vs 88 notifications) exhibit target rate jumps of **0.22 on average**—22x larger than binomial sampling noise.
 - The generator treated these columns as **keys into a lookup table**.
-- Applying multi-frequency trigonometric projections ($\sin(2\pi x / T), \cos(2\pi x / T)$ with periods $T \in \{10, 20, 50\}$) allowed shallow trees to split across unions of disjoint intervals without consuming excessive tree depth.
+- Applying multi-frequency trigonometric projections (`sin(2 * pi * x / T)` and `cos(2 * pi * x / T)` with periods `T in {10, 20, 50}`) allowed shallow trees to split across unions of disjoint intervals without consuming excessive tree depth.
 
 ### 4. Transductive Imputation: Augment, Never Replace
-Replacing missing values with model-imputed values hurt performance by $-0.00090$ because modern gradient boosted trees learn optimal default split directions for NaNs. 
-Instead, we ran **transductive XGBoost regression imputation on train + test features** and appended the imputed predictions **alongside** the original NaN-bearing columns and binary missingness indicators (`na_*`). This yielded a **$+0.00125$ lift (+33× noise floor)**.
+Replacing missing values with model-imputed values hurt performance by `-0.00090` because modern gradient boosted trees learn optimal default split directions for NaNs. 
+Instead, we ran **transductive XGBoost regression imputation on train + test features** and appended the imputed predictions **alongside** the original NaN-bearing columns and binary missingness indicators (`na_*`). This yielded a **`+0.00125` lift (+33x noise floor)**.
 
 ### 5. Leak-Free 10-Fold Nested Bayesian Target Encoding
 To extract maximum value from high-cardinality discrete keys without data leakage:
 - Evaluated out-of-fold target statistics within each outer training fold using an internal 5-fold cross-fitting scheme:
-  $$\hat{p}_k = \frac{n_k \cdot \bar{y}_k + m \cdot \mu_{\text{global}}}{n_k + m}, \quad m = 10.0$$
+```text
+smoothed_stat = (count * mean + 10.0 * global_mean) / (count + 10.0)
+```
 - Assigned an explicit string level `__missing__` prior to string casting to prevent pandas 3.0+ string-type NA dropping traps.
 
 ---
@@ -101,26 +107,27 @@ The final production pipeline in [`main.ipynb`](file:///d:/Project/Predicting_Sm
 
 ```mermaid
 flowchart TD
-    A[Raw Data: 691k Train / 296k Test] --> B[Transductive XGBoost Imputation]
-    B --> C[Feature Engineering: Accounting Residuals & Circadian Ratios]
-    C --> D[Decimal Lattice: frac, d1, is_int, is_half]
-    C --> E[Nested 10-Fold Bayesian Target & Frequency Encodings]
+    A["Raw Data: 691k Train / 296k Test"] --> B["Transductive XGBoost Imputation"]
+    B --> C["Feature Engineering: Accounting Residuals & Circadian Ratios"]
+    C --> D["Decimal Lattice: frac, d1, is_int, is_half"]
+    C --> E["Nested 10-Fold Bayesian Target & Frequency Encodings"]
     
-    D & E --> M1[10x Deep CatBoost GPU - Depth 7 Native TE]
-    D & E --> M2[10x Deep XGBoost CUDA - Depth 8 Hist]
-    D & E --> M3[10x XGBoost CUDA - Depth 6 Hist + Lattice]
-    D & E --> M4[10x Regularized XGBoost - Depth 5 alpha 1.5, lambda 6.0]
-    D & E --> M5[10x High-Capacity LightGBM - num_leaves 127]
-    C --> M6[10x CatBoost GPU - Depth 6 Augmented Ratios]
+    D & E --> M1["10x Deep CatBoost GPU - Depth 7 Native TE"]
+    D & E --> M2["10x Deep XGBoost CUDA - Depth 8 Hist"]
+    D & E --> M3["10x XGBoost CUDA - Depth 6 Hist + Lattice"]
+    D & E --> M4["10x Regularized XGBoost - Depth 5 alpha 1.5, lambda 6.0"]
+    D & E --> M5["10x High-Capacity LightGBM - num_leaves 127"]
+    C --> M6["10x CatBoost GPU - Depth 6 Augmented Ratios"]
     
-    M1 & M2 & M3 & M4 & M5 & M6 --> Z[Logit Space Transformation: log p / 1-p]
-    Z --> META1[Multi-Seed L2 Linear Logit Stacker]
-    Z & D --> META2[Regime-Gated Decision Tree Stacker - 22 Regime Attributes]
+    M1 & M2 & M3 & M4 & M5 & M6 --> Z["Logit Space Transformation: log(p / (1-p))"]
+    Z --> META1["Multi-Seed L2 Linear Logit Stacker"]
+    Z & D --> META2["Regime-Gated Decision Tree Stacker (22 Regime Attributes)"]
     
-    META1 --> BLEND[Calibrated Convex Blend: 0.85 Linear + 0.15 MoE Gating]
+    META1 --> BLEND["Calibrated Convex Blend: 0.85 Linear + 0.15 MoE Gating"]
     META2 --> BLEND
-    BLEND --> SUB[Final Calibrated Continuous Probability: submission.csv]
+    BLEND --> SUB["Final Calibrated Continuous Probability: submission.csv"]
 ```
+
 
 ---
 
