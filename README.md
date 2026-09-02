@@ -2,11 +2,12 @@
 
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![Kaggle Competition](https://img.shields.io/badge/Kaggle-Playground%20s6e8-20BEFF.svg?logo=kaggle)](https://www.kaggle.com/competitions/playground-series-s6e8)
-[![Metric](https://img.shields.io/badge/Metric-ROC--AUC%200.97024-brightgreen.svg)]()
+[![Private Score](https://img.shields.io/badge/Private%20Score-0.96988-success.svg)]()
+[![Public Score](https://img.shields.io/badge/Public%20Score-0.97024-brightgreen.svg)]()
 [![CUDA](https://img.shields.io/badge/CUDA-GPU%20Accelerated-76B900.svg?logo=nvidia)](https://developer.nvidia.com/cuda-zone)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-An end-to-end competitive machine learning system for predicting smartphone addiction from behavioral usage patterns, demographic attributes, and circadian metrics. Developed for **Kaggle Playground Series (Season 6, Episode 8)**, this repository contains the complete 19-iteration engineering journey from an initial baseline (0.92310) to a state-of-the-art **Regime-Gated Mixture of Experts (MoE) 60-Model GPU Pipeline** achieving **0.96920 Out-of-Fold ROC-AUC** and **0.97024 Public Leaderboard**.
+An end-to-end competitive machine learning system for predicting smartphone addiction from behavioral usage patterns, demographic attributes, and circadian metrics. Developed for **Kaggle Playground Series (Season 6, Episode 8)**, this repository contains the complete 19-iteration engineering journey from an initial baseline (0.92310) to a state-of-the-art **Regime-Gated Mixture of Experts (MoE) 60-Model GPU Pipeline** achieving **0.96920 Out-of-Fold ROC-AUC**, **0.97024 Public Leaderboard**, and an officially verified **0.96988 Private Leaderboard** score.
 
 ---
 
@@ -153,7 +154,7 @@ flowchart TD
 | **16** | Pure 0.970+ SOTA Logit-Stack Ensemble | 35 | 0.96915 | 0.97024 | Feature space distillation; stacking in unconstrained logit space |
 | **17** | Rank-01 Multi-Stream Normalization | 37 | 0.96915 | 0.97019 | Analysis of percentile rank space vs logit space |
 | **18** | Deep 60-Model GPU Dual-Engine Meta-Stack | 37 | 0.96920 | 0.97024 | Native CatBoost ordered target statistics on GPU |
-| **19** | **Regime-Gated MoE 60-Model GPU Pipeline** | **37** | **0.96920** | **0.97024** | **Final production pipeline: 22-regime dynamic MoE routing** |
+| **19** | **Regime-Gated MoE 60-Model GPU Pipeline** | **37** | **0.96920** | **0.97024 (Pub) / 0.96988 (Priv)** | **Final production pipeline: rock-solid private generalization** |
 
 ---
 
@@ -170,14 +171,14 @@ flowchart TD
 | CatBoost on Augmented Ratios | CUDA / GPU | Depth 6 | 0.96077 | 0.2285 |
 
 ### Final Ensemble Evaluation Metrics
-| Metric | 10-Fold OOF Score | Test Set / Public LB |
-| :--- | :---: | :---: |
-| **ROC-AUC** | **0.96920** | **0.97024** |
-| **Peak Individual Fold AUC** | **0.96957** | — |
-| **Classification Accuracy** | **91.05%** | — |
-| **F1-Score** | **0.93710** | — |
-| **Precision** | **0.93482** | — |
-| **Recall** | **0.93940** | — |
+| Metric | 10-Fold OOF Score | Public LB (20%) | Private LB (80% Final) |
+| :--- | :---: | :---: | :---: |
+| **ROC-AUC** | **0.96920** | **0.97024** | **0.96988** |
+| **Peak Individual Fold AUC** | **0.96957** | — | — |
+| **Classification Accuracy** | **91.05%** | — | — |
+| **F1-Score** | **0.93710** | — | — |
+| **Precision** | **0.93482** | — | — |
+| **Recall** | **0.93940** | — | — |
 
 ---
 
@@ -186,11 +187,14 @@ flowchart TD
 ### 1. The Measured Noise Floor vs The Ceiling
 Across 5 repeated independent cross-validation seeds on 691k rows, the **noise floor of the mean OOF AUC is 0.00004** (40× tighter than per-fold variance). Any claimed gain below this threshold is pure partition noise.
 
-### 2. The Public vs Private Leaderboard Reality
+### 2. The Public vs Private Leaderboard Reality & Official Verification
 The public leaderboard represented only **~20%** of the test data (59k rows); the remaining **80%** (237k rows) was evaluated on the private leaderboard.
-- Community notebooks scoring above **0.97120** were almost exclusively post-processing rank blends of other competitors' output `.csv` files ("Frankenstein" blends) without out-of-fold validation.
-- Historical data across completed Kaggle Season 6 episodes demonstrates that **50% of the public top 10 fell completely out of the top 50 on the private leaderboard**.
-- Pure tree-based models trained strictly on `train.csv` naturally capped at ~0.97074. Our model at 0.97024 represents an honest, leak-free, highly regularized solution designed to hold its ground against private shakeup.
+- **Official Competition Result**:
+  - **Public Score (20%)**: `0.97024`
+  - **Private Score (80%)**: `0.96988`
+  - **Stability Delta**: **`-0.00036`** (virtually zero shakeup degradation)
+- In contrast, many community notebooks scoring above `0.97120` on the public board were post-processing percentile rank blends of other competitors' output `.csv` files ("Frankenstein" blends) or reverse micro-sorting against public test noise. Historical data across Kaggle Season 6 episodes shows that **50% of public top-10 finishes collapsed on the private leaderboard**.
+- Our model's out-of-fold cross-validation (`0.96920`) accurately predicted real test performance (`0.96988`), proving that leak-free nested Bayesian target encoding, transductive imputation, and regularized logit stacking successfully protected against overfitting.
 
 ---
 
