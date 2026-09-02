@@ -24,10 +24,13 @@ share/python-wheels/
 *.egg-info/
 .installed.cfg
 *.egg
-MANIFEST
+# Data and local checkpoints
+Data/
 Data
 catboost_info/
 *.npy
+*.csv
+!submission.csv
 
 # PyInstaller
 #   Usually these files are written by a python script from a template
